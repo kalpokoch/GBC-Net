@@ -21,10 +21,12 @@ GBC-Net/
 │   ├── ablation_backbones.yaml          # inherits the binary config (_base_)
 │   └── attributes_biomedclip.yaml
 ├── scripts/
+│   ├── mask_dataset.py                  # raw slices -> body-masked dataset_masked/ + mapping.csv
 │   ├── prepare_binary_split.py          # builds data/manifests/binary_split_manifest.csv
 │   └── audit_split_integrity.py         # path / exact-hash / near-duplicate leakage audit
 ├── src/gbcnet/
 │   ├── config.py                        # YAML + _base_ inheritance + --set overrides
+│   ├── preprocessing.py                 # body masking (threshold, morphology, largest contour)
 │   ├── data/binary.py                   # grayscale dataset, albumentations transforms, sampler
 │   ├── data/attributes.py               # dual-scale (full + RUQ crop) dataset, TTA, label masking
 │   ├── models/attention.py              # CBAM, MSAM
@@ -61,12 +63,29 @@ Expected layout (paths can be changed in the configs or with `--set data.image_d
 
 ```text
 data/
-├── dataset_masked/                # cancer/<contributor>/.../*.jpg|png, non-cancer/*.png
+├── raw/                           # original slices
+│   ├── GBCA/<contributor>/<batch>/.../*.jpg|png
+│   └── NORMAL GALL BLADDER 851/*.png
+├── dataset_masked/                # generated: cancer/<contributor>/.../, non-cancer/
 ├── manifests/binary_split_manifest.csv
 └── labels/attribute_labels_llm.csv          # and attribute_labels_ruleBased.csv
 ```
 
-Build the binary manifest. To reproduce the split behind the reported results, pin the
+**Step 1 — body masking.** Each slice is thresholded at gray level 20, cleaned with a
+morphological close (x2) and open (x1) using a 15 px elliptical kernel, reduced to its largest
+filled contour, and everything outside that body mask is set to black. Folder structure and
+filenames are preserved. The script also writes `mapping.csv`, `mask_stats.json`, and reports the
+cancer vs. normal body-only intensity gap (a potential acquisition shortcut).
+
+```bash
+# Inspect the masks on a few random slices first (writes data/mask_preview.png)
+python scripts/mask_dataset.py --data-dir data/raw --out-dir data/dataset_masked --preview 4
+
+# Mask the full dataset
+python scripts/mask_dataset.py --data-dir data/raw --out-dir data/dataset_masked
+```
+
+**Step 2 — split manifest.** To reproduce the split behind the reported results, pin the
 100-image test set the 5-fold notebook saved (every other image becomes `train_val`):
 
 ```bash

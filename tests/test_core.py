@@ -64,6 +64,19 @@ def test_overrides():
     assert cfg["train"]["epochs"] == 2 and cfg["seeds"] == [0]
 
 
+def test_body_mask_keeps_largest_region_and_fills_holes():
+    from gbcnet.preprocessing import apply_body_mask, create_body_mask
+
+    img = np.zeros((200, 200), dtype=np.uint8)
+    img[40:160, 40:160] = 120   # body
+    img[90:110, 90:110] = 5     # dark internal region (e.g. air) -> filled
+    img[5:12, 5:12] = 200       # small bright artefact outside body -> removed
+    mask = create_body_mask(img)
+    assert mask[100, 100] == 255 and mask[8, 8] == 0
+    out = apply_body_mask(img, mask)
+    assert out[8, 8] == 0 and out[60, 60] == 120
+
+
 def test_group_ids_merge_same_report_slices():
     span = '{"wall_thickening": ["asymmetric enhancing wall thickening of fundus"]}'
     df = pd.DataFrame({
