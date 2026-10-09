@@ -1,9 +1,7 @@
-# Backbone comparison sweep (3-fold CV, lighter budget), ported from
-# Aug21/BinaryClassification/Ablation/
-#   "Model Comparison - DenseNet vs ResNet vs EfficientNet vs ConvNeXt Variants.ipynb"
+# Backbone comparison sweep (3-fold CV, lighter budget).
 #
 # Every model shares one generic recipe; this is a baseline sweep, not a
-# per-architecture-tuned ablation (same caveat as the notebook).
+# per-architecture-tuned ablation.
 #
 # The proposed model is NOT retrained here: point `proposed_run_dir` at the
 # output directory of `gbcnet.train_binary` and its saved fold predictions are

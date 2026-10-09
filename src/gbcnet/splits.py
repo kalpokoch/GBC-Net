@@ -14,7 +14,7 @@ Split = Tuple[np.ndarray, np.ndarray]
 
 
 def stratified_kfold(labels: Sequence[int], n_splits: int, seed: int) -> List[Split]:
-    """Image-level stratified k-fold (as in the binary notebooks)."""
+    """Image-level stratified k-fold."""
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
     labels = np.asarray(labels)
     return list(skf.split(np.zeros(len(labels)), labels))

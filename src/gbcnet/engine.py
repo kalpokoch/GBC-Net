@@ -1,6 +1,6 @@
 """Training/inference engine for the binary task (shared by every registry model).
 
-Recipe (from the ConvNeXt-Tiny + CBAM + MSAM notebook):
+Recipe:
   phase 1  backbone + attention frozen, AdamW on attention/classifier,
            CosineAnnealingLR over `warmup_epochs`
   phase 2  everything trainable, per-group AdamW learning rates,

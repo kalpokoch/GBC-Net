@@ -60,7 +60,7 @@ class BinaryCTDataset(Dataset):
 
 
 def _gauss_noise(p: float):
-    # Notebook: var_limit=(10, 50) in uint8 pixel units -> std 3.2-7.1 px.
+    # var_limit=(10, 50) in uint8 pixel units -> std 3.2-7.1 px.
     if ALBUMENTATIONS_V2:
         return A.GaussNoise(std_range=(np.sqrt(10.0) / 255.0, np.sqrt(50.0) / 255.0), p=p)
     return A.GaussNoise(var_limit=(10.0, 50.0), p=p)
@@ -80,10 +80,10 @@ def _coarse_dropout(p: float):
 
 
 def build_binary_transforms(image_size: int = 512, center_crop: int = 350) -> Tuple[A.Compose, A.Compose]:
-    """Train and val/test transforms from the ConvNeXt-Tiny + CBAM + MSAM notebook.
+    """Train and val/test transforms for the binary task.
 
-    The notebook passed albumentations-1.x arguments; on 2.x those are silently
-    ignored (defaults used instead), so the 2.x branch maps them explicitly.
+    Several transforms changed argument names in albumentations 2.x (1.x-style
+    arguments are silently ignored there), so they are built version-aware.
     """
     train_transform = A.Compose(
         [

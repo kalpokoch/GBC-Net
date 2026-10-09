@@ -3,12 +3,11 @@
 
 Labels come from the top-level folder (`cancer/` -> 1, `non-cancer/` -> 0).
 
-Reproduce the split used for the reported results (fixed 100-image test set
-saved by the 5-fold notebook) -- every other image becomes train_val:
+Pin an existing test set (CSV with a relative_path column) -- every other
+image becomes train_val:
 
     python scripts/prepare_binary_split.py --image-dir data/dataset_masked \
-        --pinned-test path/to/Output_ConvNeXtTiny_CBAM_MSAM_5Fold/results/test_set.csv \
-        --out data/manifests/binary_split_manifest.csv
+        --pinned-test path/to/test_set.csv --out data/manifests/binary_split_manifest.csv
 
 Or draw a new stratified test set (N images per class):
 

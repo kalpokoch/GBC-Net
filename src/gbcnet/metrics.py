@@ -48,7 +48,7 @@ SUMMARY_KEYS = ["auc", "f1", "sensitivity", "specificity", "precision", "accurac
 
 
 def summarize_folds(fold_metrics: List[Dict]) -> Dict[str, float]:
-    """Mean and (population) std across folds, as in the notebooks."""
+    """Mean and (population) std across folds."""
     out = {}
     for key in SUMMARY_KEYS:
         vals = np.array([m[key] for m in fold_metrics], dtype=float)

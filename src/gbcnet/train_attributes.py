@@ -1,6 +1,6 @@
 """Multi-label attribute classifier: multi-seed x grouped k-fold CV with OOF evaluation.
 
-Pipeline (from train_v3_multiseed_maskedloss.ipynb):
+Pipeline:
   1. load LLM- or rule-extracted attribute labels; rows with zero positives are
      report-parsing failures -> kept but masked from loss, metrics and sampling
   2. grouped MultilabelStratifiedKFold: same-report sibling slices never span folds

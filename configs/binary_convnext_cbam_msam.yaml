@@ -1,21 +1,17 @@
 # Proposed model: ConvNeXt-Tiny + CBAM + MSAM, cancer vs. normal, 5-fold CV.
-# Ported from Aug21/BinaryClassification/TrainNotebook/
-#   "ConvNeXtTiny + CBAM + MSAM - 5Fold CV.ipynb"
-# Values are the notebook's CONFIG values (code, not its markdown text, where
-# they disagree: epochs=250, early_stopping_patience=50).
 #
 # Override any key from the command line, e.g.
 #   python -m gbcnet.train_binary --config configs/binary_convnext_cbam_msam.yaml \
 #       --set train.epochs=2 cv.n_splits=2
 
 seed: 42
-deterministic: false          # notebook used cudnn.benchmark=True + TF32 (fast, not bit-reproducible)
+deterministic: false          # cudnn.benchmark + TF32 (fast, not bit-reproducible)
 
 data:
   image_dir: data/dataset_masked
   manifest: data/manifests/binary_split_manifest.csv   # relative_path,label,split (train_val|test)
-  num_workers: 4              # notebook used 16 on a 256-core host; lower on a workstation
-  cache_images: true          # keep decoded grayscale images in RAM (as in the notebook)
+  num_workers: 4              # raise on many-core hosts (augmentation is CPU-bound)
+  cache_images: true          # keep decoded grayscale images in RAM
   global_mean: 0.456
   global_std: 0.224
 

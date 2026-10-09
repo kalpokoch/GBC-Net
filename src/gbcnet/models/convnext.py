@@ -1,8 +1,4 @@
-"""ConvNeXt-Tiny variants for 1-channel grayscale CT, binary output.
-
-Attribute names (features / cbam / msam / classifier) match the notebook
-checkpoints, so `*_best.pth` files trained there load directly.
-"""
+"""ConvNeXt-Tiny variants for 1-channel grayscale CT, binary output."""
 
 from __future__ import annotations
 

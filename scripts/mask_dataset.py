@@ -41,7 +41,7 @@ from gbcnet.utils import save_json  # noqa: E402
 
 
 def save_preview(entries, class_dirs, args, path: Path) -> None:
-    """Original / mask / masked grid for a few images (replaces the notebook's interactive plots)."""
+    """Original / mask / masked grid for a few images."""
     fig, axes = plt.subplots(len(entries), 3, figsize=(12, 4 * len(entries)), squeeze=False)
     for row, entry in zip(axes, entries):
         img = cv2.imread(str(source_path(entry, class_dirs)), cv2.IMREAD_GRAYSCALE)

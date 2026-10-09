@@ -23,7 +23,7 @@ def test_model_forward_and_param_groups(name):
     assert grouped == {id(p) for p in model.parameters()}, "optimizer groups must cover every parameter exactly"
 
 
-def test_proposed_checkpoint_keys_match_notebook_layout():
+def test_proposed_checkpoint_key_layout():
     keys = build_model("ConvNeXtTiny_CBAM_MSAM", pretrained=False).state_dict().keys()
     assert "features.0.0.weight" in keys
     assert "cbam.channel_attention.fc.0.weight" in keys

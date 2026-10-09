@@ -1,7 +1,5 @@
 # Multi-label attribute classifier: BiomedCLIP ViT-B/16 @336, dual-scale
 # (full slice + RUQ crop), masked asymmetric loss, 3 seeds x 5 grouped folds.
-# Ported from Aug21/AttributeClassification/train_v3_multiseed_maskedloss.ipynb
-# (the run behind BioMedCLIP_GBCA_v3_multiseed_maskedloss_grouped_llm/).
 #
 # Quick correctness check before a multi-hour run:
 #   python -m gbcnet.train_attributes --config configs/attributes_biomedclip.yaml \
@@ -13,7 +11,7 @@ deterministic: true
 data:
   image_dir: data/dataset_masked
   labels_csv: data/labels/attribute_labels_llm.csv   # or attribute_labels_ruleBased.csv
-  num_workers: 0               # >0 segfaulted on the shared MIG host; try 4 on a workstation
+  num_workers: 0               # raise if DataLoader workers are stable on your host
   mask_unparsed_rows: true     # keep rows with zero positives, mask them out of loss/metrics/sampling
   label_cols:
     - wall_thickening
@@ -52,7 +50,7 @@ train:
   epochs: 40
   patience: 10
   lr_head: 1.0e-3
-  lr_encoder: 2.0e-5           # v3 sweep winner ('higher_encoder_lr')
+  lr_encoder: 2.0e-5
   warmup_epochs: 5
   weight_decay: 0.01
   grad_clip: 1.0

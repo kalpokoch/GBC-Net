@@ -23,7 +23,7 @@ def set_seed(seed: int = 42, deterministic: bool = False) -> None:
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
     elif torch.cuda.is_available():
-        # Matches the binary notebooks: fast, not bit-reproducible.
+        # Fast, not bit-reproducible.
         torch.backends.cudnn.benchmark = True
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True

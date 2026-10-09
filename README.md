@@ -2,13 +2,12 @@
 
 Script-based, config-driven PyTorch code for three experiments on gallbladder CT slices:
 
-| Experiment | Entry point | Config | Ported from |
-|---|---|---|---|
-| **Binary classifier** (cancer vs. normal): ConvNeXt-Tiny + CBAM + MSAM, 5-fold CV | `gbcnet.train_binary` | `configs/binary_convnext_cbam_msam.yaml` | `Aug21/BinaryClassification/TrainNotebook/ConvNeXtTiny + CBAM + MSAM - 5Fold CV.ipynb` |
-| **Backbone ablation**: DenseNet121 / ResNet50 / EfficientNet-B0 / ConvNeXt-Tiny (plain, +CBAM), 3-fold CV | `gbcnet.ablation` | `configs/ablation_backbones.yaml` | `Aug21/BinaryClassification/Ablation/Model Comparison ….ipynb` |
-| **Attribute classifier** (7 radiological findings, multi-label): BiomedCLIP @336, dual-scale, 3 seeds × 5 grouped folds | `gbcnet.train_attributes` | `configs/attributes_biomedclip.yaml` | `Aug21/AttributeClassification/train_v3_multiseed_maskedloss.ipynb` |
-
-Model definitions keep the notebooks' module names, so existing `*_best.pth` checkpoints load directly.
+- **Binary classifier** (cancer vs. normal): ConvNeXt-Tiny + CBAM + MSAM, 5-fold CV —
+  `gbcnet.train_binary`, `configs/binary_convnext_cbam_msam.yaml`
+- **Backbone ablation**: DenseNet121 / ResNet50 / EfficientNet-B0 / ConvNeXt-Tiny (plain, +CBAM), 3-fold CV —
+  `gbcnet.ablation`, `configs/ablation_backbones.yaml`
+- **Attribute classifier** (7 radiological findings, multi-label): BiomedCLIP @336, dual-scale, 3 seeds × 5 grouped folds —
+  `gbcnet.train_attributes`, `configs/attributes_biomedclip.yaml`
 
 ---
 
@@ -85,13 +84,13 @@ python scripts/mask_dataset.py --data-dir data/raw --out-dir data/dataset_masked
 python scripts/mask_dataset.py --data-dir data/raw --out-dir data/dataset_masked
 ```
 
-**Step 2 — split manifest.** To reproduce the split behind the reported results, pin the
-100-image test set the 5-fold notebook saved (every other image becomes `train_val`):
+**Step 2 — split manifest.** Draw a stratified test set, or pin an existing one (a CSV with a
+`relative_path` column; every other image becomes `train_val`):
 
 ```bash
 python scripts/prepare_binary_split.py --image-dir data/dataset_masked \
-  --pinned-test ../Aug21/BinaryClassification/Output_ConvNeXtTiny_CBAM_MSAM_5Fold/results/test_set.csv \
-  --out data/manifests/binary_split_manifest.csv
+  --test-per-class 50 --seed 42 --out data/manifests/binary_split_manifest.csv
+# or: --pinned-test path/to/test_set.csv
 
 python scripts/audit_split_integrity.py --manifest data/manifests/binary_split_manifest.csv \
   --image-dir data/dataset_masked
@@ -133,24 +132,19 @@ python -m gbcnet.benchmark --device cuda --out benchmark_gpu.json
 Each run writes `config_resolved.yaml`, `environment.json` (library versions) and a log file to its
 output directory, alongside checkpoints, per-fold metrics/predictions and figures.
 
-## 5. Differences from the notebooks
+## 5. Design notes
 
-| | Notebook | This repo |
-|---|---|---|
-| Decision threshold | Binary: F1-tuned on the test set. Attributes: per-label F1-tuned on OOF predictions | **Fixed at 0.5** for both tasks (`gbcnet.metrics.DECISION_THRESHOLD`); no threshold optimization |
-| albumentations 2.x | 1.x arguments (`var_limit`, `alpha_affine`, `max_holes`, …) are silently ignored on 2.x, with warnings suppressed | Mapped explicitly to the 2.x API (`data/binary.py`); the installed version is logged per run |
-| Proposed model in the ablation | Checkpoints re-loaded and re-inferred | Saved fold predictions read from the proposed run directory |
-| Configuration | `CONFIG` dicts in cells | YAML + `--set` overrides; resolved config saved with each run |
-| Bootstrap CIs | — | Pooled-metric 95% CIs (`eval.bootstrap`) |
-
-Verification on this machine: loading the Aug21 fold checkpoints into the ported model gives
-test AUCs within 0.002–0.007 of the notebook's recorded values (bf16 vs. fp32 inference alone moves
-them by ~0.003), and the attribute pipeline reproduces the Aug21 run's 639 patient groups exactly.
+- **Decision threshold** is fixed at 0.5 for both tasks (`gbcnet.metrics.DECISION_THRESHOLD`);
+  no threshold optimization is performed.
+- **Augmentation** works with albumentations 1.x and 2.x: arguments are mapped to the installed
+  API (`data/binary.py`), and the library version is logged with every run.
+- **Ablation comparison** reads the proposed model's saved fold predictions instead of re-running it.
+- **Uncertainty**: pooled test metrics come with percentile-bootstrap 95% CIs (`eval.bootstrap`).
 
 ## 6. Known limitations
 
 - **Binary split is image-level.** There is no patient ID; slices from one patient can fall in
   both `train_val` and `test`. `audit_split_integrity.py` flags only near-identical slices.
 - **Attribute results are out-of-fold with no held-out test set.**
-- The masked-image intensity mismatch between classes (see `Aug6/KNOWLEDGE_BASE.md` §6) is a
-  potential confound for the binary task.
+- **Class intensity mismatch.** Masked cancer and normal slices differ in mean body intensity
+  (see the report written by `scripts/mask_dataset.py`), a potential confound for the binary task.
