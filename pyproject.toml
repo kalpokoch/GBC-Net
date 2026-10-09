@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gbcnet"
+version = "0.1.0"
+description = "Gallbladder carcinoma CT classification: ConvNeXt-Tiny+CBAM+MSAM binary classifier, backbone ablation, and BiomedCLIP multi-label attribute classifier"
+requires-python = ">=3.9"
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "timm>=0.9.0",
+    "numpy>=1.23.0",
+    "pandas>=1.5.0",
+    "scikit-learn>=1.2.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "opencv-python>=4.7.0",
+    "albumentations>=1.3.0",
+    "Pillow>=9.0.0",
+    "tqdm>=4.64.0",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+attributes = ["open_clip_torch>=2.20.0", "iterative-stratification>=0.1.7"]
+explain = ["grad-cam>=1.4.0"]
+benchmark = ["thop>=0.1.1"]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

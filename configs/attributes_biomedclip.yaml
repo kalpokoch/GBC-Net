@@ -1,0 +1,69 @@
+# Multi-label attribute classifier: BiomedCLIP ViT-B/16 @336, dual-scale
+# (full slice + RUQ crop), masked asymmetric loss, 3 seeds x 5 grouped folds.
+# Ported from Aug21/AttributeClassification/train_v3_multiseed_maskedloss.ipynb
+# (the run behind BioMedCLIP_GBCA_v3_multiseed_maskedloss_grouped_llm/).
+#
+# Quick correctness check before a multi-hour run:
+#   python -m gbcnet.train_attributes --config configs/attributes_biomedclip.yaml \
+#       --set seeds=[0] cv.n_folds=2 train.epochs=2 train.patience=2 train.freeze_warmup_epochs=1
+
+seed: 42                       # also the fold-split seed and the final-refit seed
+deterministic: true
+
+data:
+  image_dir: data/dataset_masked
+  labels_csv: data/labels/attribute_labels_llm.csv   # or attribute_labels_ruleBased.csv
+  num_workers: 0               # >0 segfaulted on the shared MIG host; try 4 on a workstation
+  mask_unparsed_rows: true     # keep rows with zero positives, mask them out of loss/metrics/sampling
+  label_cols:
+    - wall_thickening
+    - mass_replacing_gb
+    - polypoidal_lesion
+    - liver_invasion
+    - lymph_node_involvement
+    - biliary_obstruction
+    - adjacent_organ_involvement
+  low_prevalence_threshold: 20
+
+transforms:
+  image_size: 336
+  use_dual_scale: true
+  ruq_frac: [0.08, 0.78, 0.00, 0.62]   # x0, x1, y0, y1 as fractions of the body bounding box
+  use_intensity_norm: true
+  intensity_pct_low: 1.0
+  intensity_pct_high: 99.0
+  use_tta: true
+  clip_mean: [0.48145466, 0.4578275, 0.40821073]
+  clip_std: [0.26862954, 0.26130258, 0.27577711]
+
+model:
+  name: hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224
+  hidden_dim: 256
+  dropout: 0.3
+
+cv:
+  n_folds: 5
+  group_min_chars: 25          # min matched-span text length for (directory, span) grouping
+
+seeds: [0, 1, 2]
+
+train:
+  batch_size: 16
+  epochs: 40
+  patience: 10
+  lr_head: 1.0e-3
+  lr_encoder: 2.0e-5           # v3 sweep winner ('higher_encoder_lr')
+  warmup_epochs: 5
+  weight_decay: 0.01
+  grad_clip: 1.0
+  freeze_warmup_epochs: 3
+  unfreeze_last_n_blocks: 4
+  asl_gamma_neg: 4.0
+  asl_gamma_pos: 1.0
+  asl_clip: 0.05
+  use_weighted_sampler: true
+
+final_refit: true              # refit one model on the full pool for mean(best_epoch) epochs
+
+output:
+  dir: outputs/attributes_biomedclip_llm

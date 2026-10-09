@@ -1,0 +1,59 @@
+# ---------------------------------------------------------------------------
+# Patient data -- NEVER commit. Image filenames and folder names contain
+# patient and clinician names; reports are free-text clinical findings.
+# ---------------------------------------------------------------------------
+/data/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tif
+*.tiff
+*.dcm
+*.nii
+*.nii.gz
+master_mapping.csv
+mapping.csv
+metadata.csv
+attribute_labels_*.csv
+*split_manifest*.csv
+test_set.csv
+df_pool_with_groups.csv
+
+# Allow figures that are explicitly placed under docs/ (de-identified only)
+!docs/**/*.png
+
+# Experiment outputs, checkpoints, archives
+/outputs/
+/runs/
+*.pth
+*.pt
+*.ckpt
+*.npy
+*.npz
+*.zip
+
+# Secrets
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.venv/
+venv/
+
+# Notebooks / editors
+.ipynb_checkpoints/
+*.ipynb
+.vscode/
+.idea/
+*.bkp
+.$*
+Thumbs.db
+.DS_Store

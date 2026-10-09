@@ -1,0 +1,26 @@
+torch>=2.0.0
+torchvision>=0.15.0
+timm>=0.9.0
+numpy>=1.23.0
+pandas>=1.5.0
+scikit-learn>=1.2.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+opencv-python>=4.7.0
+albumentations>=1.3.0
+Pillow>=9.0.0
+tqdm>=4.64.0
+PyYAML>=6.0
+
+# Attribute classifier (BiomedCLIP)
+open_clip_torch>=2.20.0
+iterative-stratification>=0.1.7
+
+# Grad-CAM++ explanations
+grad-cam>=1.4.0
+
+# FLOP counting (optional)
+thop>=0.1.1
+
+# Tests
+pytest>=7.0

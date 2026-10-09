@@ -1,0 +1,37 @@
+# Backbone comparison sweep (3-fold CV, lighter budget), ported from
+# Aug21/BinaryClassification/Ablation/
+#   "Model Comparison - DenseNet vs ResNet vs EfficientNet vs ConvNeXt Variants.ipynb"
+#
+# Every model shares one generic recipe; this is a baseline sweep, not a
+# per-architecture-tuned ablation (same caveat as the notebook).
+#
+# The proposed model is NOT retrained here: point `proposed_run_dir` at the
+# output directory of `gbcnet.train_binary` and its saved fold predictions are
+# folded into the comparison figures.
+
+_base_: binary_convnext_cbam_msam.yaml
+
+models:
+  - DenseNet121
+  - ResNet50
+  - EfficientNet_B0
+  - ConvNeXtTiny_Plain
+  - ConvNeXtTiny_CBAM
+
+proposed_run_dir: outputs/binary_convnext_cbam_msam
+proposed_label: ConvNeXtTiny_CBAM_MSAM (Proposed)
+
+cv:
+  n_splits: 3
+
+train:
+  epochs: 80
+  warmup_epochs: 5
+  min_epochs: 15
+  early_stopping_patience: 10
+
+eval:
+  bootstrap: 0
+
+output:
+  dir: outputs/ablation_backbones
